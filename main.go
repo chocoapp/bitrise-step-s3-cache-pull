@@ -11,9 +11,6 @@ import (
 )
 
 const (
-	BITRISE_GIT_BRANCH       = "BITRISE_GIT_BRANCH"
-	BITRISE_OSX_STACK_REV_ID = "BITRISE_OSX_STACK_REV_ID"
-
 	CACHE_AWS_ACCESS_KEY_ID     = "cache_aws_access_key_id"
 	CACHE_AWS_SECRET_ACCESS_KEY = "cache_aws_secret_access_key"
 	CACHE_AWS_REGION            = "cache_aws_region"
@@ -21,39 +18,6 @@ const (
 	CACHE_RESTORE_KEYS          = "cache_restore_keys"
 	CACHE_PATH                  = "cache_path"
 )
-
-func parseRestoreKeysInput(keysString string) []string {
-	var keys []string
-	for _, keyString := range strings.Split(
-		strings.TrimSpace(
-			keysString,
-		),
-		"\n",
-	) {
-		keys = append(keys, strings.TrimSpace(keyString))
-	}
-	return keys
-}
-
-func parseRestoreKeys(restoreKeys string) ([]string, error) {
-	branch := os.Getenv(BITRISE_GIT_BRANCH)
-	stackrev := os.Getenv(BITRISE_OSX_STACK_REV_ID)
-	functionExecuter := cacheutil.NewCacheKeyFunctionExecuter(branch, stackrev)
-	keyParser := cacheutil.NewKeyParser(&functionExecuter)
-
-	var keys []string
-	for _, keyTemplate := range parseRestoreKeysInput(restoreKeys) {
-		key, err := keyParser.Parse(keyTemplate)
-
-		if err != nil {
-			return nil, err
-		}
-
-		keys = append(keys, key)
-	}
-
-	return keys, nil
-}
 
 func main() {
 	awsAccessKeyId := GetEnvOrExit(CACHE_AWS_ACCESS_KEY_ID)
@@ -71,13 +35,9 @@ func main() {
 			bucketName,
 		)
 
-		keys, err := parseRestoreKeys(restoreKeys)
+		keys := restoreKeys
 
-		if err != nil {
-			log.Fatalf("failed to parse keys\nerror: %s", err.Error())
-		}
-
-		for _, key := range keys {
+		for _, key := range restoreKeys {
 			log.Printf("Checking if cache exists for key '%s'\n", key)
 			cacheExists, cacheKey := s3.CacheExists(key)
 			if cacheExists {
