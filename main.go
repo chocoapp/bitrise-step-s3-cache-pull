@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/alephao/cacheutil"
 	"github.com/mholt/archiver"
 )
 
@@ -18,6 +17,19 @@ const (
 	CACHE_RESTORE_KEYS          = "cache_restore_keys"
 	CACHE_PATH                  = "cache_path"
 )
+
+func parseRestoreKeysInput(keysString string) []string {
+	var keys []string
+	for _, keyString := range strings.Split(
+		strings.TrimSpace(
+			keysString,
+		),
+		"\n",
+	) {
+		keys = append(keys, strings.TrimSpace(keyString))
+	}
+	return keys
+}
 
 func main() {
 	awsAccessKeyId := GetEnvOrExit(CACHE_AWS_ACCESS_KEY_ID)
@@ -35,9 +47,9 @@ func main() {
 			bucketName,
 		)
 
-		keys := restoreKeys
+		keys := parseRestoreKeysInput(restoreKeys)
 
-		for _, key := range restoreKeys {
+		for _, key := range keys {
 			log.Printf("Checking if cache exists for key '%s'\n", key)
 			cacheExists, cacheKey := s3.CacheExists(key)
 			if cacheExists {
