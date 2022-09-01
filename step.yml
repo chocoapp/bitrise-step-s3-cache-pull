@@ -1,7 +1,7 @@
 title: |-
-  S3 Cache Pull
+  S3 derived data Cache Pull
 summary: |
-  A step to retrieve your cache from a S3 bucket using custom keys with fallback.
+  A step to retrieve your derived data from a S3 bucket using custom keys.
 
   This should be used with the s3-cache-push step to store the cache.
 
