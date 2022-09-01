@@ -51,11 +51,10 @@ Should be used with [S3 Cache Push](https://github.com/alephao/bitrise-step-s3-c
                 <b>cache_restore_keys</b>
             </td>
             <td>
-                <span>The list of keys with fallbacks to restore the cache. E.g.:</span>
+                <span>The list of keys to restore the cache. E.g.:</span>
                 <pre>
-{{ stackrev }}-{{ branch }}-{{ checksum "Cartfile.resolved" }}
-carthage-{{ branch }}-{{ checksum "Cartfile.resolved" }}
-carthage-{{ branch }}
+carthage-$BRANCH_NAME-$COMMIT_SHA
+carthage-$BRANCH_NAME
 carthage-
                 </pre>
             </td>
