@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -66,24 +65,4 @@ func (a *AwsS3) Download(key, outputPath string) (int64, error) {
 			Key:    aws.String(key),
 		},
 	)
-}
-
-func (a *AwsS3) UploadToAws(key, pathToFile string) error {
-	uploader := s3manager.NewUploader(a.sess)
-
-	f, err := os.Open(pathToFile)
-	if err != nil {
-		return fmt.Errorf("failed to open file %q, %v", pathToFile, err)
-	}
-
-	_, err = uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(a.bucketName),
-		Key:    aws.String(key),
-		Body:   f,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to upload file, %v", err)
-	}
-
-	return nil
 }

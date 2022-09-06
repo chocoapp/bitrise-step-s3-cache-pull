@@ -1,12 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strings"
-
-	"github.com/mholt/archiver"
 )
 
 const (
@@ -39,42 +36,33 @@ func main() {
 	restoreKeys := GetEnvOrExit(CACHE_RESTORE_KEYS)
 	cachePath := GetEnvOrExit(CACHE_PATH)
 
-	CreateTempFolder(func(tempFolderPath string) {
-		s3 := NewAwsS3(
-			awsRegion,
-			awsAccessKeyId,
-			awsSecretAccessKey,
-			bucketName,
-		)
+	s3 := NewAwsS3(
+		awsRegion,
+		awsAccessKeyId,
+		awsSecretAccessKey,
+		bucketName,
+	)
 
-		keys := parseRestoreKeysInput(restoreKeys)
+	keys := parseRestoreKeysInput(restoreKeys)
 
-		for _, key := range keys {
-			log.Printf("Checking if cache exists for key '%s'\n", key)
-			cacheExists, cacheKey := s3.CacheExists(key)
-			if cacheExists {
-				log.Println("Cache found! Downloading...")
-				downloadedFilePath := fmt.Sprintf("%s/%s.zip", tempFolderPath, cacheKey)
-				size, err := s3.Download(cacheKey, downloadedFilePath)
+	for _, key := range keys {
+		log.Printf("Checking if cache exists for key '%s'\n", key)
+		cacheExists, cacheKey := s3.CacheExists(key)
+		if cacheExists {
+			log.Println("Cache found! Downloading...")
+			size, err := s3.Download(cacheKey, cachePath)
 
-				if err != nil {
-					log.Printf("Download failed with error: %s. Cancelling cache restore.\n", err.Error())
-					return
-				}
-
-				log.Printf("Download was successful, file size: %d. Uncompressing...\n", size)
-
-				err = archiver.Unarchive(downloadedFilePath, cachePath)
-
-				if err != nil {
-					log.Printf("Failed to uncompress: %s. Cancelling cache restore.\n", err.Error())
-					return
-				}
+			if err != nil {
+				log.Printf("Download failed with error: %s. Cancelling cache restore.\n", err.Error())
 				return
 			}
+
+			log.Printf("Download was successful, file size: %d.", size)
+
+			return
 		}
-		log.Println("Cache not found.")
-	})
+	}
+	log.Println("Cache not found.")
 
 	os.Exit(0)
 }

@@ -135,7 +135,7 @@ inputs:
   - cache_path:
     opts:
       title: Cache path
-      summary: Path to extract the file or directory cached. Relative to the root of the git repo.
+      summary: Path to download the file or directory cached. Relative to the root of the git repo.
       description: |
         If you stored the cache as `/path/to/my/folder`, the compressed file in the bucket will contain
         only `folder`, therefore you'll need to set this to `/path/to/my/`
